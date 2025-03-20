@@ -10,7 +10,7 @@ fi
 
 cp test/teste$1.mem memory.mem
 vvp ./tb > saida.out
-sed -i '' '1,/^\*\*\*.*$/d' saida.out
+sed '1,/^\*\*\*.*$/d' saida.out > temp.out && mv temp.out saida.out
 cp saida.out test/saida$1.out
 cp saida.vcd test/saida$1.vcd
 rm saida.out saida.vcd memory.mem
