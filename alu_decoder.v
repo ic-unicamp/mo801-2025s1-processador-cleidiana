@@ -5,6 +5,7 @@ module ALUDecoder (
     input [2:0] ALUSrcB,       
     output [3:0] ALUCtr 
 );
+always @(posedge clk) begin
   case (ALU_op)
     0: 
     begin 
@@ -49,5 +50,5 @@ module ALUDecoder (
     end
   endcase
 
-
+end
 endmodule
