@@ -1,52 +1,53 @@
 //ALU Decoder
-
 module ALUDecoder (  
-    input [2:0] ALUSrcA,   
-    input [2:0] ALUSrcB,       
-    output [3:0] ALUCtr 
+    input ALU_op,
+    output reg [2:0] ALU_srcA,   
+    output reg [2:0] ALU_srcB,       
+    output reg [3:0] ALU_ctr
 );
-always @(posedge clk) begin
+
+always @(*) begin
   case (ALU_op)
     0: 
     begin 
-      ALUSrcA = 00;
-      ALUSrcB = 10;
-      ALUCtr = 00;
+      ALU_srcA = 0;
+      ALU_srcB = 2;
+      ALU_ctr = 00;
     end
     1: 
     begin 
-      ALUSrcA = 00;
-      ALUSrcB = 00;
-      ALUOp = 00;
+      ALU_srcA = 00;
+      ALU_srcB = 00;
+      ALU_ctr = 00;
     end
     2: 
     begin 
-      ALUSrcA = 00;
-      ALUSrcB = 00;
-      ALUOp = 00;
+      ALU_srcA = 00;
+      ALU_srcB = 00;
+      ALU_ctr = 00;
     end
     3: 
     begin 
-      ALUSrcA = 00;
-      ALUSrcB = 00;
-      ALUOp = 00;
+      ALU_srcA = 00;
+      ALU_srcB = 00;
+      ALU_ctr = 00;
     end
     4: 
     begin 
-      ALUSrcA = 00;
-      ALUSrcB = 00;
-      ALUOp = 00;
+      ALU_srcA = 00;
+      ALU_srcB = 00;
+      ALU_ctr = 00;
     end
     5: 
     begin 
-      ALUSrcA = 00;
-      ALUSrcB = 00;
-      ALUOp = 00;
+      ALU_srcA = 00;
+      ALU_srcB = 00;
+      ALU_ctr = 00;
     end
     default: begin
-      ALUSrcA = 00;
-      ALUSrcB = 00;
-      ALUOp = 00;
+      ALU_srcA = 00;
+      ALU_srcB = 00;
+      ALU_ctr = 00;
     end
   endcase
 

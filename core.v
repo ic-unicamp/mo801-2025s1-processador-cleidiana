@@ -6,7 +6,10 @@ module core( // modulo de um core
   input [31:0] data_in, // dado de entrada
   output reg we // write enable
 );
-
+reg state;
+wire [2:0] ALU_srcA;   
+wire [2:0] ALU_srcB;       
+wire [3:0] ALU_ctr; 
 wire [6:0] op; 
 wire [2:0] funct3; 
 wire [1:0] funct7;
@@ -15,21 +18,21 @@ wire [4:0] rs1;
 wire [4:0] rs2;
 wire [31:0] imm;
 wire ALU_op;
-wire pc;
-assign  we = 0;
-assign  data_out = 32'h00000000;
-assign  op = Adr[6:0];
-assign  funct3 = Adr[14:12];
-assign  rd = Adr[11:7];
-assign  rs1 = Adr[19:15];
-assign  rs2 = Adr[24:20];
-assign  funct7 = Adr[31:25];
-assign  immI = Adr[31:20];
-assign  immS = {Adr[31:25], Adr[11:7]};
-assign  immB = {Adr[12], Adr[30:25], Adr[11:8], Adr[11]};
-assign  immU = Adr[31:12];
-assign  immJ = {Adr[20], Adr[30:21], Adr[11], Adr[19:12]};
-assign  ALU_op = 0;
+reg pc;
+reg pc_next;
+reg pc_add;
+
+assign  op = data_in[6:0];
+assign  funct3 = data_out[14:12];
+assign  rd = data_out[11:7];
+assign  rs1 = data_out[19:15];
+assign  rs2 = data_out[24:20];
+assign  funct7 = data_out[31:25];
+assign  immI = data_out[31:20];
+assign  immS = {data_out[31:25], data_out[11:7]};
+assign  immB = {data_out[12], data_out[30:25], data_out[11:8], data_out[11]};
+assign  immU = data_out[31:12];
+assign  immJ = {data_out[20], data_out[30:21], data_out[11], data_out[19:12]};
 
 //Main Controller
 /*
@@ -41,54 +44,59 @@ assign  ALU_op = 0;
     4 - MemWB
 
 */
+parameter r_type = 7'b0110011;
+ALUDecoder ad(  
+  .ALU_srcA(ALU_srcA),   
+  .ALU_srcB(ALU_srcB),       
+  .ALU_ctr(ALU_ctr),
+  .ALU_op(ALU_op)
+);
+
 always @(posedge clk) begin
-  if (resetn == 1'b0) 
-    state = 0
-  else begin  
+  if (resetn == 1'b0) begin
+    state = 0;
+    pc = 1;
+    end
+  else begin
+    //$display(op);
     case (state)
       0: begin 
         state = 1;
-        pc = next_pc;
+        pc = pc_next;
       end
       1: begin 
       case (op)
-        6'b0110011: begin //R-type
-          format = 0;
+        r_type: begin //R-type
+          if(funct3 == 3)begin
+            state = 0;
+            $display("soma");
+          end
         end
-        6'b0000011: begin //I-type 
-          format = 1;
+        7'b0000011: begin //I-type 
+          state = 1;
         end
-        6'b0010011: begin //I-type 
-          format = 1;
+        7'b0010011: begin //I-type 
+          state = 1;
         end
-        6'b1100111: begin //I-type 
-          format = 1;
+        7'b1100111: begin //I-type 
+          state = 1;
         end
-        6'b0100011: begin //S-type 
-          format = 2;
+        7'b0100011: begin //S-type 
+          state = 2;
         end
-        6'b1100111: begin //B-type 
-          format = 3;
+        7'b1100111: begin //B-type 
+          state = 3;
         end
-        6'b0110011: begin //U-type 
-          format = 4;
+        7'b0110011: begin //U-type 
+          state = 4;
         end
-        6'b1101111: begin //J-type 
-          format = 5;
+        7'b1101111: begin //J-type 
+          state = 5;
         end
         default: begin
-          format = 0; //faz uma leitura como defalt
+          state = 0; //faz uma leitura como defalt
         end
       endcase
-      end
-      2: begin 
-        state =
-      end
-      3: begin 
-        state =
-      end
-      4: begin
-        state =
       end
       default: begin
         state = 0;
@@ -97,82 +105,19 @@ always @(posedge clk) begin
   end
 end
 
-always @(state) begin  
+always @(*) begin  
+  //default values
+  pc_add = 0;
   case (state)
     0: begin 
-      PCWrite = 0;
-      AdrSrc = 0;
-      memWrite = 0;
-      IRWrite = 1;
-      ResultSrc = 00;
-      ALUControl = 00;
-      ALUSrcA = 00;
-      ALUSrcB =10;
-      immSrc = 0;
-      RegWrite = 0;
-      PCnext  = pc + val;
+      pc_next  = pc + pc_add;
     end
     1: begin 
-      PCWrite = 0;
-      AdrSrc = 0;
-      memWrite = 0;
-      IRWrite = 1;
-      ResultSrc = 00;
-      ALUControl = 00;
-      ALUSrcA = 00;
-      ALUSrcB =10;
-      immSrc = 0;
-      RegWrite = 0;
-    end
-    2: begin 
-      PCWrite = 0;
-      AdrSrc = 0;
-      memWrite = 0;
-      IRWrite = 1;
-      ResultSrc = 00;
-      ALUControl = 00;
-      ALUSrcA = 00;
-      ALUSrcB =10;
-      immSrc = 0;
-      RegWrite = 0;
-    end
-    3: begin 
-      PCWrite = 0;
-      AdrSrc = 0;
-      memWrite = 0;
-      IRWrite = 1;
-      ResultSrc = 00;
-      ALUControl = 00;
-      ALUSrcA = 00;
-      ALUSrcB =10;
-      immSrc = 0;
-      RegWrite = 0;
-    end
-    4:begin
-      PCWrite = 0;
-      AdrSrc = 0;
-      memWrite = 0;
-      IRWrite = 1;
-      ResultSrc = 00;
-      ALUControl = 00;
-      ALUSrcA = 00;
-      ALUSrcB =10;
-      immSrc = 0;
-      RegWrite = 0;
+      pc_next  = pc;
     end
     default: begin
-      PCWrite = 0;
-      AdrSrc = 0;
-      memWrite = 0;
-      IRWrite = 1;
-      ResultSrc = 00;
-      ALUControl = 00;
-      ALUSrcA = 00;
-      ALUSrcB =10;
-      immSrc = 0;
-      RegWrite = 0;
     end
   endcase
-end
+  end
 
 endmodule

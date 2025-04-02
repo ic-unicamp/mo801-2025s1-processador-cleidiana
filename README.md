@@ -31,3 +31,7 @@ Seu código deve ser sintetizávelvel, isso significa que deve ser possível ger
 Você deve entregar o seu projeto através do Github Classroom, bastando fazer um *commit* e *push* do seu código. os testes serão executados automaticamente. A data limite para entrega é o último dia do mês.
 
 Seu código será avaliado com mais testes do que os que estão dispnoíveis aqui.
+
+iverilog -o multi core.v alu_decoder.v memory.v reg_files.v tb.v
+vvp multi
+./run.sh 00

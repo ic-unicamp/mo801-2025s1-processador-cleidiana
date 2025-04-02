@@ -20,7 +20,7 @@ initial begin
   for (i = 0; i < 1024; i = i + 1) begin
     mem[i] = 32'h00000000;
   end
-  $readmemh("memory.mem", mem);
+  $readmemh("memory.mem", mem, 1, 1);
 end
 
 endmodule

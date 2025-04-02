@@ -12,11 +12,23 @@ module RegisterFile (
 
 reg [31:0] regfile [0:31];
 
+integer i;
+initial begin
+  for (i = 0; i < 32; i = i + 1)
+    regfile[i] = 32'h00000000;
+end
+
+always @(posedge clk) begin
+  if (we)  
+    regfile[w] = data_in;
+end
+
 always @(posedge clk) begin
   begin
   if(we)
-      registradores[w] = data_in;
-    data_out1 = w[rs1]; 
-    data_out2 = w[rs2];
+      //registradores[w] = data_in;
+    data_out1 = regfile[rs1]; 
+    data_out2 = regfile[rs2];
   end 
 end
+endmodule
