@@ -1,6 +1,5 @@
 module RegisterFile (
   input clk,               
-  input resetn,            
   input [4:0] rs1,         
   input [4:0] rs2,         
   input [4:0] w,          
@@ -19,16 +18,13 @@ initial begin
 end
 
 always @(posedge clk) begin
-  if (we)  
+  if (we && w)  begin
     regfile[w] = data_in;
+    $display("GRAVOU :", data_in, " x", w);
+  end
+  data_out1 = regfile[rs1]; 
+  data_out2 = regfile[rs2];
+    
 end
 
-always @(posedge clk) begin
-  begin
-  if(we)
-      //registradores[w] = data_in;
-    data_out1 = regfile[rs1]; 
-    data_out2 = regfile[rs2];
-  end 
-end
 endmodule
