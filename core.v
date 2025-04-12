@@ -92,8 +92,7 @@ alu ad(
   .zero(zero)
 );
 
-RegisterFile regisFile(  
-  .clk(clk),                  
+RegisterFile regisFile(     
   .rs1(rs1),         
   .rs2(rs2),         
   .w(reg_w),          
@@ -117,7 +116,7 @@ always @(posedge clk) begin
      
     if (PCWrite) begin
       pc = pc_next;
-     // if(DEBUG) $display("PROXIMO PC: ", pc);
+      if(DEBUG) $display("PROXIMO PC: ", pc);
     end
     if (IRWrite) begin
       instr = data_in;
@@ -197,6 +196,9 @@ always @(*) begin
           ALU_srcA = data_out1;
           ALU_srcB = immS;
           data_out = data_out2;
+          state_next = MEMADR;
+          AdrSrc = 1;
+          MemWrite = 1;
           fmt = S_TYPE;
         end
         7'b1100011 : begin //B-type 
@@ -208,9 +210,9 @@ always @(*) begin
         end
         7'b1101111 : begin //J-type 
           if(DEBUG) $display("J-type");
-          ALU_srcA = data_out1;
-          ALU_srcB = data_out2;
-          state_next = EXECUTE;
+          state_next = FETCH;
+          PCWrite = 1;
+          pc_next = immJ;
           fmt = J_TYPE;
         end
         7'b0110111 : begin //U-type 
@@ -230,8 +232,6 @@ always @(*) begin
 
     MEMADR: begin 
       if(DEBUG_ST) $display("MEMADR");
-      AdrSrc = 1;
-      MemWrite = 1;
       if (op == 7'b0000011)
           state_next = MEMREAD;
       else
@@ -270,7 +270,7 @@ always @(*) begin
 
   endcase
 
-  address = (AdrSrc) ? ALU_resp : pc;
+  address = (AdrSrc) ? ALU_resp : pc_next;
   we = MemWrite;
   
 end
