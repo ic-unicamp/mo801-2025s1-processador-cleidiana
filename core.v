@@ -6,7 +6,7 @@ module core( // modulo de um core
   input [31:0] data_in, // dado de entrada
   output reg we // write enable
 );
-reg state;
+
 wire [2:0] ALU_srcA;   
 wire [2:0] ALU_srcB;       
 wire [3:0] ALU_ctr; 
@@ -18,33 +18,41 @@ wire [4:0] rs1;
 wire [4:0] rs2;
 wire [31:0] imm;
 wire ALU_op;
-reg pc;
-reg pc_next;
-reg pc_add;
 
-assign  op = data_in[6:0];
-assign  funct3 = data_out[14:12];
-assign  rd = data_out[11:7];
-assign  rs1 = data_out[19:15];
-assign  rs2 = data_out[24:20];
-assign  funct7 = data_out[31:25];
-assign  immI = data_out[31:20];
-assign  immS = {data_out[31:25], data_out[11:7]};
-assign  immB = {data_out[12], data_out[30:25], data_out[11:8], data_out[11]};
-assign  immU = data_out[31:12];
-assign  immJ = {data_out[20], data_out[30:21], data_out[11], data_out[19:12]};
+reg [3:0] state = 0, state_next = 0;
+reg [31:0] pc;
+reg [31:0] pc_next;
+reg [31:0] pc_add;
+reg PCWrite;
+reg AdrSrc;
+reg [31:0] instr;    
 
-//Main Controller
-/*
-  state: 
-    0 - Fetch
-    1 - Decode
-    2 - MemAdr
-    3 - MemRead
-    4 - MemWB
+// Associação das variaveis de acordo com a instrução 
+assign  op = instr[6:0];
+assign  funct3 = instr[14:12];
+assign  rd = instr[11:7];
+assign  rs1 = instr[19:15];
+assign  rs2 = instr[24:20];
+assign  funct7 = instr[31:25];
+assign  immI = instr[31:20];
+assign  immS = {instr[31:25], instr[11:7]};
+assign  immB = {instr[12], instr[30:25], instr[11:8], instr[11]};
+assign  immU = instr[31:12];
+assign  immJ = {instr[20], instr[30:21], instr[11], instr[19:12]}; 
 
-*/
-parameter r_type = 7'b0110011;
+// Definição log para debug
+parameter DEBUG = 0;
+
+// Definições estados da maquina de estados
+parameter IDLE = 0;
+parameter FETCH = 1;
+parameter DECODE = 2;
+parameter MEMADR = 3;
+parameter MEMREAD = 4;
+parameter MEMWB = 5;
+
+reg [31:0] registers[0:31];
+
 ALUDecoder ad(  
   .ALU_srcA(ALU_srcA),   
   .ALU_srcB(ALU_srcB),       
@@ -52,72 +60,58 @@ ALUDecoder ad(
   .ALU_op(ALU_op)
 );
 
+// Primeiro always apenas atualiza o state
 always @(posedge clk) begin
-  if (resetn == 1'b0) begin
-    state = 0;
-    pc = 1;
-    end
-  else begin
-    //$display(op);
-    case (state)
-      0: begin 
-        state = 1;
-        pc = pc_next;
-      end
-      1: begin 
-      case (op)
-        r_type: begin //R-type
-          if(funct3 == 3)begin
-            state = 0;
-            $display("soma");
-          end
-        end
-        7'b0000011: begin //I-type 
-          state = 1;
-        end
-        7'b0010011: begin //I-type 
-          state = 1;
-        end
-        7'b1100111: begin //I-type 
-          state = 1;
-        end
-        7'b0100011: begin //S-type 
-          state = 2;
-        end
-        7'b1100111: begin //B-type 
-          state = 3;
-        end
-        7'b0110011: begin //U-type 
-          state = 4;
-        end
-        7'b1101111: begin //J-type 
-          state = 5;
-        end
-        default: begin
-          state = 0; //faz uma leitura como defalt
-        end
-      endcase
-      end
-      default: begin
-        state = 0;
-      end
-    endcase
+
+  if (!resetn) begin
+    if(state != IDLE) if(DEBUG) $display("RESET");
+    state = IDLE;
   end
+  else  begin
+    state = state_next;
+  end
+
 end
 
+// Maquina de estado
 always @(*) begin  
-  //default values
-  pc_add = 0;
+
   case (state)
-    0: begin 
-      pc_next  = pc + pc_add;
+
+    IDLE: begin
+      if(DEBUG) $display("IDLE");
+        state_next = FETCH;
     end
-    1: begin 
-      pc_next  = pc;
+
+    FETCH: begin 
+      if(DEBUG) $display("FETCH");
+      state_next = DECODE;
     end
+
+    DECODE: begin 
+      if(DEBUG) $display("DECODE");
+      state_next = MEMADR;
+    end
+
+    MEMADR: begin 
+      if(DEBUG) $display("MEMADR");
+      state_next = MEMREAD;
+    end
+
+    MEMREAD: begin 
+      if(DEBUG) $display("MEMREAD");
+      state_next = MEMWB;
+    end
+    MEMWB: begin 
+      if(DEBUG) $display("MEMWB");
+    end
+    
     default: begin
+      state_next = 0;
     end
+
   endcase
-  end
+
+end
 
 endmodule
