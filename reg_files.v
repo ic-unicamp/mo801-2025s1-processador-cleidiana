@@ -19,7 +19,7 @@ end
 always @(*) begin
   if (we && w)  begin
     regfile[w] = data_in;
-    $display("GRAVOU :", data_in, " x", w);
+    $display("GRAVOU : 0x%h", data_in, " x", w);
   end
   data_out1 = regfile[rs1]; 
   data_out2 = regfile[rs2];

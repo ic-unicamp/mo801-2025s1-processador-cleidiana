@@ -47,8 +47,8 @@ assign immU = {instr[31:12], 12'b0};
 assign immJ = {{11{instr[31]}}, instr[31], instr[19:12], instr[20], instr[30:21], 1'b0};
 
 // Definição log para debug
-parameter DEBUG = 1;
-parameter DEBUG_ST = 1;
+parameter DEBUG = 0;
+parameter DEBUG_ST = 0;
 
 // Definições estados da maquina de estados
 parameter IDLE = 0;
@@ -244,8 +244,6 @@ always @(*) begin
       state_next = MEMWB;
     end
     MEMWB: begin 
-      //RegWrite = 1;
-      //ResultSrc = 2'b01;
       if(DEBUG_ST) $display("MEMWB");
       state_next = FETCH;
     end
