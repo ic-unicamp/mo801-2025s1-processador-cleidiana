@@ -15,14 +15,24 @@ parameter XOR = 4'b0100;
 parameter SLL = 4'b0101;
 parameter SRL = 4'b0110;
 parameter SLT = 4'b0111;
+parameter BEQ = 4'b1000;
+parameter BNE = 4'b1001;
+parameter BLT = 4'b1010;
+parameter BGE = 4'b1011;
+parameter BLTU = 4'b1100;
+parameter BGEU = 4'b1101;
 
 //Definições FMT
 parameter R_TYPE = 0;
 parameter I_TYPE = 1;
-parameter S_TYPE = 2;
-parameter B_TYPE = 3;
-parameter J_TYPE = 4;
-parameter U_TYPE = 5;
+parameter IL_TYPE = 2;
+parameter IE_TYPE = 3;
+parameter S_TYPE = 4;
+parameter B_TYPE = 5;
+parameter J_TYPE = 6;
+parameter JI_TYPE = 7;
+parameter U_TYPE = 8;
+parameter UP_TYPE = 9;
 
 always @(*) begin
 
@@ -80,11 +90,31 @@ always @(*) begin
             else if (funct3 == 3) begin //todo
             end  
         end
+        IL_TYPE: begin
+         ALU_ctr = ADD;
+        end
         S_TYPE: begin
            ALU_ctr = ADD;
         end
         B_TYPE: begin
-            ALU_ctr = SUB;
+            if (funct3 == 0) begin
+                ALU_ctr = BEQ;
+            end 
+            else if (funct3 == 1) begin
+                ALU_ctr = BNE;
+            end 
+            else if (funct3 == 4) begin
+                ALU_ctr = BLT;
+            end 
+            else if (funct3 == 5) begin
+                ALU_ctr = BGE;
+            end 
+            else if (funct3 == 6) begin
+                ALU_ctr = BLTU; 
+            end 
+            else if (funct3 == 7) begin
+                ALU_ctr = BGEU; 
+            end 
         end
         J_TYPE: begin
             ALU_ctr = ADD;

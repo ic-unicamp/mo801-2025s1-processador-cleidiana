@@ -15,7 +15,12 @@ parameter XOR = 4'b0100;
 parameter SLL = 4'b0101;
 parameter SRL = 4'b0110;
 parameter SLT = 4'b0111;
-
+parameter BEQ = 4'b1000;
+parameter BNE = 4'b1001;
+parameter BLT = 4'b1010;
+parameter BGE = 4'b1011;
+parameter BLTU = 4'b1100;
+parameter BGEU = 4'b1101;
 assign zero = (ALU_resp == 0);
 
 always @(*) begin
@@ -29,6 +34,12 @@ always @(*) begin
     SLL: ALU_resp = ALU_srcA << ALU_srcB[4:0];   
     SRL: ALU_resp = ALU_srcA >> ALU_srcB[4:0];  
     SLT: ALU_resp = ($signed(ALU_srcA) < $signed(ALU_srcB)) ? 32'd1 : 32'd0; 
+    BEQ: ALU_resp = ALU_srcA == ALU_srcB;  
+    BNE: ALU_resp = ALU_srcA != ALU_srcB;  
+    BLT: ALU_resp = ALU_srcA < ALU_srcB;  
+    BGE: ALU_resp = ALU_srcA >= ALU_srcB;  
+    BLTU: ALU_resp = ALU_srcA < ALU_srcB;  
+    BGEU: ALU_resp = ALU_srcA >= ALU_srcB;  
     default: ALU_resp = 32'd0;
   endcase
 
