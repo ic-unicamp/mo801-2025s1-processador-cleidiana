@@ -7,20 +7,16 @@ module alu_dec (
 );
 
 // Definições operações ALU
-parameter ADD = 4'b0000;
-parameter SUB = 4'b0001;
-parameter AND = 4'b0010;
-parameter OR = 4'b0011;
-parameter XOR = 4'b0100;
-parameter SLL = 4'b0101;
-parameter SRL = 4'b0110;
-parameter SLT = 4'b0111;
-parameter BEQ = 4'b1000;
-parameter BNE = 4'b1001;
-parameter BLT = 4'b1010;
-parameter BGE = 4'b1011;
-parameter BLTU = 4'b1100;
-parameter BGEU = 4'b1101;
+parameter ADD = 5'b00000;
+parameter SUB = 5'b00001;
+parameter AND = 5'b00010;
+parameter OR = 5'b00011;
+parameter XOR = 5'b00100;
+parameter SLL = 5'b00101;
+parameter SRL = 5'b00110;
+parameter SLT = 5'b00111;
+parameter SRA = 5'b01110;
+parameter SLTU = 5'b01111;
 
 //Definições FMT
 parameter R_TYPE = 0;
@@ -56,12 +52,13 @@ always @(*) begin
             end 
             else if (funct3 == 5) begin
                 if (funct7 == 0) ALU_ctr = SRL; 
-                //else if (funct7 == 'h20) ALU_ctr = SRA; 
+                else if (funct7 == 'h20) ALU_ctr = SRA; 
             end 
             else if (funct3 == 2) begin
                 ALU_ctr = SLT; 
             end
-            else if (funct3 == 3) begin //todo
+            else if (funct3 == 3) begin 
+                ALU_ctr = SLTU;
             end 
         end
         I_TYPE: begin
@@ -82,12 +79,13 @@ always @(*) begin
             end 
             else if (funct3 == 5) begin
                 if (funct7 == 0) ALU_ctr = SRL; 
-               // else if (funct7 == 'h20) ALU_ctr = SRA; 
+                else if (funct7 == 'h20) ALU_ctr = SRA; 
             end 
             else if (funct3 == 2) begin
                 ALU_ctr = SLT; 
             end
-            else if (funct3 == 3) begin //todo
+            else if (funct3 == 3) begin 
+                ALU_ctr = SLTU;
             end  
         end
         IL_TYPE: begin
@@ -97,29 +95,15 @@ always @(*) begin
            ALU_ctr = ADD;
         end
         B_TYPE: begin
-            if (funct3 == 0) begin
-                ALU_ctr = BEQ;
-            end 
-            else if (funct3 == 1) begin
-                ALU_ctr = BNE;
-            end 
-            else if (funct3 == 4) begin
-                ALU_ctr = BLT;
-            end 
-            else if (funct3 == 5) begin
-                ALU_ctr = BGE;
-            end 
-            else if (funct3 == 6) begin
-                ALU_ctr = BLTU; 
-            end 
-            else if (funct3 == 7) begin
-                ALU_ctr = BGEU; 
-            end 
+            ALU_ctr = ADD;
         end
         J_TYPE: begin
             ALU_ctr = ADD;
         end
         U_TYPE: begin
+            ALU_ctr = SLL;
+        end
+        UP_TYPE: begin
             ALU_ctr = ADD;
         end
         default: ALU_ctr = ADD;
