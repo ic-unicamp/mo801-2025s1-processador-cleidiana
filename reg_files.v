@@ -1,4 +1,5 @@
-module RegisterFile (    
+module RegisterFile (   
+  input clk, 
   input [4:0] rs1,         
   input [4:0] rs2,         
   input [4:0] w,          
@@ -16,11 +17,16 @@ initial begin
     regfile[i] = 32'h00000000;
 end
 
-always @(*) begin
+always @(posedge clk) begin
   if (we && w)  begin
     regfile[w] = data_in;
     $display("GRAVOU : 0x%h", data_in, " x", w);
   end
+  
+    
+end
+
+always @(*) begin
   data_out1 = regfile[rs1]; 
   data_out2 = regfile[rs2];
     
