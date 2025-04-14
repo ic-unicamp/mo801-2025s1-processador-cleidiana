@@ -214,7 +214,6 @@ always @(*) begin
           fmt = B_TYPE;
         end
         7'b1101111 : begin //J-type 
-          $display("J-type pc_next", pc_next);
           ALU_srcA = pc_next;
           ALU_srcB = immJ;
           state_next = EXECUTE_J;
@@ -259,7 +258,7 @@ always @(*) begin
     MEMADR: begin 
       if(DEBUG_ST) $display("MEMADR");
       AdrSrc = 1;
-      if (op == 7'b0000011) begin
+      if (op == 7'b0000011) begin //LOAD
         RegWrite = 1;  
         reg_w = rd;
         if (funct3 == 0) begin
@@ -274,7 +273,7 @@ always @(*) begin
           data_out = {16'b0, data_in[15:0]};
         end
         state_next = MEMREAD;
-      end else begin
+      end else begin //STORE
         weMem = 1;
         if (funct3 == 0) begin
           data_out = {{24{data_out2[7]}}, data_out2[7:0]};
@@ -314,7 +313,7 @@ always @(*) begin
       state_next = ALUWB;
     end
     EXECUTE_J: begin 
-      $display("EXECUTE J");
+      if(DEBUG_ST) $display("EXECUTE J");
       reg_w = rd;
       RegWrite = 1;
       data_out = pc_next+4;
@@ -323,39 +322,39 @@ always @(*) begin
       state_next = FETCH;
     end
     EXECUTE_B: begin 
-      if(1) $display("EXECUTE_B 0x%h", pc);
-        
-        if (funct3 == 0) begin
-          if(data_out1 == data_out2) begin
-            Branch = 1;
-          end
-        end 
-        else if (funct3 == 1) begin
-          if(data_out1 != data_out2)begin
-            Branch = 1;
-          end
-        end 
-        else if (funct3 == 4) begin
-          if($signed(data_out1) < $signed(data_out2))begin
-            Branch = 1;
-          end
-        end 
-        else if (funct3 == 5) begin
-          if(($signed(data_out1) >= $signed(data_out2)))begin
-            Branch = 1;
-          end
-        end 
-        else if (funct3 == 6) begin
-          if(data_out1 < data_out2)begin
-            Branch = 1;
-          end
-        end 
-        else if (funct3 == 7) begin
-          if(data_out1 >= data_out2)begin
-            Branch = 1;
-          end
-        end 
-        PCWrite = 1;
+
+      if(DEBUG_ST)  $display("EXECUTE_B 0x%h", pc);
+      if (funct3 == 0) begin
+        if(data_out1 == data_out2) begin
+          Branch = 1;
+        end
+      end 
+      else if (funct3 == 1) begin
+        if(data_out1 != data_out2)begin
+          Branch = 1;
+        end
+      end 
+      else if (funct3 == 4) begin
+        if($signed(data_out1) < $signed(data_out2))begin
+          Branch = 1;
+        end
+      end 
+      else if (funct3 == 5) begin
+        if(($signed(data_out1) >= $signed(data_out2)))begin
+          Branch = 1;
+        end
+      end 
+      else if (funct3 == 6) begin
+        if(data_out1 < data_out2)begin
+          Branch = 1;
+        end
+      end 
+      else if (funct3 == 7) begin
+        if(data_out1 >= data_out2)begin
+          Branch = 1;
+        end
+      end 
+      PCWrite = 1;
       state_next = FETCH;
     end
     EXECUTE_U: begin
