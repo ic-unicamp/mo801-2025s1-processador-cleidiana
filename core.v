@@ -208,7 +208,7 @@ always @(*) begin
           fmt = S_TYPE;
         end
         7'b1100011 : begin //B-type 
-          $display("B-type");
+          if(DEBUG) $display("B-type");
           ALU_srcA = pc_next;
           ALU_srcB = immB;
           state_next = EXECUTE_B;
