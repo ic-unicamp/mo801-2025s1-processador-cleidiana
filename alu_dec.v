@@ -36,7 +36,7 @@ always @(*) begin
     case (fmt)
         R_TYPE: begin
             case (funct3)
-            
+
                 0: begin
                     if(funct7 == 0) ALU_ctr = ADD;
                     else if(funct7 == 'h20) ALU_ctr = SUB;
@@ -62,7 +62,7 @@ always @(*) begin
         I_TYPE: begin
             case (funct3)
 
-                0: ALU_ctr = ADD:
+                0: ALU_ctr = ADD;
                 4: ALU_ctr = XOR;
                 6: ALU_ctr = OR;
                 7: ALU_ctr = AND;
