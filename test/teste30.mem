@@ -1,0 +1,11 @@
+0x40000093 // addi x1 x0 1024	addi x1, x0, 0x400
+0x001080b3 // add x1 x1 x1	add x1, x1, x1
+0x08000113 // addi x2 x0 128	addi x2, x0, 0x80
+0xfff14113 // xori x2 x2 -1	xori x2, x2, -1
+0x123451b7 // lui x3 74565	li x3, 0x12345678
+0x67818193 // addi x3 x3 1656	li x3, 0x12345678
+0x0020a023 // sw x2 0(x1)	sw x2, 0(x1)
+0x00309223 // sh x3 4(x1)	sh x3, 4(x1)
+0x0000c283 // lbu x5 0(x1)	lbu x5, 0(x1)
+0x00409303 // lh x6 4(x1)	lh x6, 4(x1)
+0x0040d383 // lhu x7 4(x1)	lhu x7, 4(x1)

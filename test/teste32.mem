@@ -1,0 +1,6 @@
+0x40000093	// addi x1 x0 1024	addi x1, x0, 0x400
+0x001080b3	// add x1 x1 x1	add x1, x1, x1
+0x00001537	// lui x10 1	lui x10, 0x1
+0x00001597	// auipc x11 1	auipc x11, 0x1
+0x00a0a023	// sw x10 0(x1)	sw x10, 0(x1)
+0x00b0a223	// sw x11 4(x1)	sw x11, 4(x1)

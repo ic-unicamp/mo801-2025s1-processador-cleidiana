@@ -1,0 +1,7 @@
+0x40000093 //	addi x1 x0 1024	addi x1, x0, 0x400
+0x001080b3 //	add x1 x1 x1	add x1, x1, x1
+0x00310263 // 	beq  x2, x3, 8       
+0x00a00293 //	addi x5 x0 10	addi x5, x0, 10
+0x01428293 //	addi x5 x5 20	addi x5, x5, 20
+0x02328293 //	addi x5 x5 35	addi x5, x5, 35
+0x0050a023 //	sw x5 0(x1)	sw x5, 0(x1)

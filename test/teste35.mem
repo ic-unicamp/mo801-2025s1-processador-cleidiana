@@ -1,0 +1,13 @@
+0x40000093	// addi x1 x0 1024	addi x1 x0 1024
+0x001080b3	// add x1 x1 x1	add x1 x1 x1
+0x00310e63	// beq x2 x3 28	beq x2, x3, label
+0x00100293	// addi x5 x0 1	addi x5 x0 1
+0x00228293	// addi x5 x5 2	addi x5 x5 2
+0x00428293	// addi x5 x5 4	addi x5 x5 4
+0x00800293	// addi x5 x0 8	addi x5 x0 8
+0x01028293	// addi x5 x5 16	addi x5 x5 16
+0x02028293	// addi x5 x5 32	addi x5 x5 32
+0x04000293	// addi x5 x0 64	addi x5 x0 64
+0x08028293	// addi x5 x5 128	addi x5 x5 128
+0x10028293	// addi x5 x5 256	addi x5 x5 256
+0x0050a023	// sw x5 0(x1)	sw x5 0(x1)
