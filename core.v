@@ -299,7 +299,7 @@ always @(*) begin
           end
         endcase
         state_next = MEMREAD;
-      end else begin //STORE
+      end else if (op == 7'b0100011) begin //STORE
         
         weMem = 1;
         case (funct3)
@@ -325,8 +325,8 @@ always @(*) begin
         endcase
         state_next = MEMWRITE;
       end else begin
-        PCWrite = 1;
-        state_next = FETCH;
+        data_out = 32'b0;
+        state_next = MEMREAD;
       end
           
     end
