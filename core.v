@@ -329,13 +329,13 @@ always @(*) begin
       state_next = ALUWB;
     end
     EXECUTE_J: begin 
-      $display("EXECUTE J");
+      if(DEBUG) $display("EXECUTE J");
       LinkReg = 1;
       PCWrite = 1;
       state_next = FETCH;
     end
     EXECUTE_JL: begin 
-      $display("EXECUTE JL");
+      if(DEBUG) $display("EXECUTE JL");
       reg_w = rd;
       RegWrite = 1;
       if (op == 7'b1101111) begin
