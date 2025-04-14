@@ -263,12 +263,40 @@ always @(*) begin
         RegWrite = 1;  
         reg_w = rd;
         case (funct3)
-          0: data_out = {{24{data_in[7]}}, data_in[7:0]};
-          1: data_out = {{16{data_in[15]}}, data_in[15:0]};
-          2: data_out = data_in;
-          3: data_out = {24'b0, data_in[7:0]};
-          4: data_out = {16'b0, data_in[15:0]};
-          default: data_out = 32'b0;
+          0: begin 
+            case (address[1:0])
+              2'b00: data_out = {{24{data_in[7]}},   data_in[7:0]};
+              2'b01: data_out = {{24{data_in[15]}},  data_in[15:8]};
+              2'b10: data_out = {{24{data_in[23]}},  data_in[23:16]};
+              2'b11: data_out = {{24{data_in[31]}},  data_in[31:24]};
+            endcase
+          end
+          1: begin 
+            case (address[1])
+              1'b0: data_out = {{16{data_in[15]}}, data_in[15:0]};
+              1'b1: data_out = {{16{data_in[31]}}, data_in[31:16]};
+            endcase
+          end
+          2: begin
+            data_out = data_in;
+          end
+          4: begin 
+            case (address[1:0])
+              2'b00: data_out = {24'b0, data_in[7:0]};
+              2'b01: data_out = {24'b0, data_in[15:8]};
+              2'b10: data_out = {24'b0, data_in[23:16]};
+              2'b11: data_out = {24'b0, data_in[31:24]};
+            endcase
+          end
+          5: begin 
+            case (address[1])
+              1'b0: data_out = {16'b0, data_in[15:0]};
+              1'b1: data_out = {16'b0, data_in[31:16]};
+            endcase
+          end
+          default: begin
+            data_out = 32'b0;
+          end
         endcase
         state_next = MEMREAD;
       end else begin //STORE
@@ -276,20 +304,17 @@ always @(*) begin
         weMem = 1;
         case (funct3)
             0: begin
-              case (address[1:0])
-                2'b00: data_out = {data_in[31:8], data_out2[7:0]};
-                2'b01: data_out = {data_in[31:16], data_out2[7:0], data_in[7:0]};
-                2'b10: data_out = {data_in[31:24], data_out2[7:0], data_in[15:0]};
-                2'b11: data_out = {data_out2[7:0], data_in[23:0]};
-              endcase
+            case (address[1:0])
+              2'b00: data_out = {data_in[31:8], data_out2[7:0]};
+              2'b01: data_out = {data_in[31:16], data_out2[7:0], data_in[7:0]};
+              2'b10: data_out = {data_in[31:24], data_out2[7:0], data_in[15:0]};
+              2'b11: data_out = {data_out2[7:0], data_in[23:0]};
+            endcase
             end
             1: begin
-              case (address[1:0])
-                2'b00: data_out = {data_in[31:16], data_out2[15:0]};
-                2'b10: data_out = {data_out2[15:0], data_in[15:0]};
-                default: begin
-                  data_out = data_in;
-                end
+              case (address[1])
+                1'b0: data_out = {data_in[31:16], data_out2[15:0]};
+                1'b1: data_out = {data_out2[15:0], data_in[15:0]};
               endcase
             end
             2: begin
@@ -299,6 +324,9 @@ always @(*) begin
             default: data_out = data_out2;
         endcase
         state_next = MEMWRITE;
+      end else begin
+        PCWrite = 1;
+        state_next = FETCH;
       end
           
     end
@@ -328,12 +356,14 @@ always @(*) begin
       data_out = ALU_resp;
       state_next = ALUWB;
     end
+   
     EXECUTE_J: begin 
       if(DEBUG) $display("EXECUTE J");
       LinkReg = 1;
       PCWrite = 1;
       state_next = FETCH;
     end
+    
     EXECUTE_JL: begin 
       if(DEBUG) $display("EXECUTE JL");
       reg_w = rd;
@@ -401,7 +431,6 @@ always @(*) begin
       PCWrite = 1;
       state_next = FETCH;
     end
-    
     default: begin
       if(DEBUG_ST) $display("DEFAULT VAI FETCH");
       PCWrite = 1;
