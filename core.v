@@ -163,7 +163,7 @@ always @(*) begin
     end
 
     FETCH: begin 
-      //$display("FETCH 0x%h", pc_next);
+      if(DEBUG_ST) $display("FETCH 0x%h", pc_next);
       IRWrite = 1; 
       state_next = DECODE;
     end
@@ -226,27 +226,27 @@ always @(*) begin
           fmt = JI_TYPE;
         end
         7'b0110111 : begin //U-type 
-          if(DEBUG) $display("U-type");
+          if(DEBUG_ST) $display("U-type");
           ALU_srcA = immU;
           ALU_srcB = 0;
           state_next = EXECUTE_U;
           fmt = U_TYPE;
         end
         7'b0010111 : begin //U-type 
-          if(DEBUG) $display("UP-type");
+          if(DEBUG_ST) $display("UP-type");
           ALU_srcA = immU;
           ALU_srcB = 0;
           state_next = EXECUTE_UP;
           fmt = U_TYPE;
         end
         7'b0001111 : begin //I-type 
-          $display("FENCE");
+          if(DEBUG_ST) $display("FENCE");
           PCWrite = 1;
           state_next = FETCH;
         end
        
         default: begin
-        if(DEBUG) $display("DEFAULT");
+        if(DEBUG_ST) $display("DEFAULT");
         PCWrite = 1;
         state_next = FETCH;
       end
