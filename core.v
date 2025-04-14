@@ -284,15 +284,17 @@ always @(*) begin
               endcase
             end
             1: begin
-              if (address[1] == 0)
-                data_out = {data_in[31:16], data_out2[15:0]};
-              else
-                data_out = {data_out2[15:0], data_in[15:0]};
+              case (address[1:0])
+                2'b00: data_out = {data_in[31:16], data_out2[15:0]};
+                2'b10: data_out = {data_out2[15:0], data_in[15:0]};
+                default: begin
+                  data_out = data_in;
+                end
+              endcase
             end
             2: begin
               data_out = data_out2;
             end
-            
             
             default: data_out = data_out2;
         endcase
