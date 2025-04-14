@@ -18,6 +18,7 @@ parameter SRL = 5'b00110;
 parameter SLT = 5'b00111;
 parameter SRA = 5'b01110;
 parameter SLTU = 5'b01111;
+parameter SLL_12 = 5'b10000;
 
 assign zero = (ALU_resp == 0);
 
@@ -29,7 +30,8 @@ always @(posedge clk) begin
     AND: ALU_resp = ALU_srcA & ALU_srcB;       
     OR: ALU_resp = ALU_srcA | ALU_srcB;         
     XOR: ALU_resp = ALU_srcA ^ ALU_srcB;       
-    SLL: ALU_resp = ALU_srcA << ALU_srcB[4:0];   
+    SLL: ALU_resp = ALU_srcA << ALU_srcB[4:0];  
+    SLL_12: ALU_resp = ALU_srcA << 12;    
     SRL: ALU_resp = ALU_srcA >> ALU_srcB[4:0];  
     SRA: ALU_resp = $signed(ALU_srcA) >>> ALU_srcB[4:0];
     SLT: ALU_resp = ($signed(ALU_srcA) < $signed(ALU_srcB)) ? 32'd1 : 32'd0; 
