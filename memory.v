@@ -14,7 +14,7 @@ assign data_out = mem[address[13:2]];
 always @(posedge clk) begin
   if (we) begin
     mem[address[13:2]] = data_in;
-    $display ("GRAVOU MEM: 0x%h", data_in, " ADDR: ", address[13:2]);
+    //$display ("GRAVOU MEM: 0x%h", data_in, " ADDR: ", address[13:2]);
   end
 end
 

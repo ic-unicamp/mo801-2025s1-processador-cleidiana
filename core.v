@@ -64,6 +64,7 @@ parameter EXECUTE_B = 9;
 parameter EXECUTE_J = 10;
 parameter EXECUTE_U = 11;
 parameter EXECUTE_UP = 12;
+parameter EXECUTE_JL = 13;
 
 //Definições FMT
 parameter R_TYPE = 0;
@@ -126,11 +127,11 @@ always @(posedge clk) begin
      
     if (PCWrite) begin
       pc = pc_next;
-      //$display("PROXIMO PC: 0x%h", pc);
+      if(DEBUG) $display("PROXIMO PC: 0x%h", pc);
     end
     if (IRWrite) begin
       instr = data_in;
-      //if(1) $display("INST: 0x%h", instr);
+      if(DEBUG) $display("INST: 0x%h", instr);
     end
     
   end
@@ -200,7 +201,7 @@ always @(*) begin
           fmt = IE_TYPE;
         end
         7'b0100011 : begin //S-type 
-          if(DEBUG) $display("S-type");
+          if(DEBUG_ST) $display("S-type");
           ALU_srcA = data_out1;
           ALU_srcB = immS;
           state_next = MEMADR;
@@ -214,16 +215,16 @@ always @(*) begin
           fmt = B_TYPE;
         end
         7'b1101111 : begin //J-type 
-          ALU_srcA = pc_next;
-          ALU_srcB = immJ;
-          state_next = EXECUTE_J;
+          ALU_srcA = pc; 
+          ALU_srcB = 4; 
+          state_next = EXECUTE_JL;
           fmt = J_TYPE;
         end
         7'b1100111 : begin //JI-type 
-          $display("JI-type");
-          ALU_srcA = data_out1; 
-          ALU_srcB = immI;     
-          state_next = EXECUTE_J;
+          if(DEBUG_ST) $display("JI-type");
+          ALU_srcA = pc; 
+          ALU_srcB = 4;   
+          state_next = EXECUTE_JL;
           fmt = JI_TYPE;
         end
         7'b0110111 : begin //U-type 
@@ -261,27 +262,40 @@ always @(*) begin
       if (op == 7'b0000011) begin //LOAD
         RegWrite = 1;  
         reg_w = rd;
-        if (funct3 == 0) begin
-          data_out = {{24{data_in[7]}}, data_in[7:0]};
-        end else if (funct3 == 1) begin
-          data_out = {{16{data_in[15]}}, data_in[15:0]};
-        end else if (funct3 == 2) begin
-          data_out = data_in;
-        end else if (funct3 == 4) begin
-          data_out = {24'b0, data_in[7:0]}; 
-        end else if (funct3 == 5) begin
-          data_out = {16'b0, data_in[15:0]};
-        end
+        case (funct3)
+          0: data_out = {{24{data_in[7]}}, data_in[7:0]};
+          1: data_out = {{16{data_in[15]}}, data_in[15:0]};
+          2: data_out = data_in;
+          3: data_out = {24'b0, data_in[7:0]};
+          4: data_out = {16'b0, data_in[15:0]};
+          default: data_out = 32'b0;
+        endcase
         state_next = MEMREAD;
       end else begin //STORE
+        
         weMem = 1;
-        if (funct3 == 0) begin
-          data_out = {{24{data_out2[7]}}, data_out2[7:0]};
-        end else if (funct3 == 1) begin
-          data_out = {{16{data_out2[15]}}, data_out2[15:0]};
-        end else if (funct3 == 2) begin
-          data_out = data_out2; 
-        end
+        case (funct3)
+            0: begin
+              case (address[1:0])
+                2'b00: data_out = {data_in[31:8], data_out2[7:0]};
+                2'b01: data_out = {data_in[31:16], data_out2[7:0], data_in[7:0]};
+                2'b10: data_out = {data_in[31:24], data_out2[7:0], data_in[15:0]};
+                2'b11: data_out = {data_out2[7:0], data_in[23:0]};
+              endcase
+            end
+            1: begin
+              if (address[1] == 0)
+                data_out = {data_in[31:16], data_out2[15:0]};
+              else
+                data_out = {data_out2[15:0], data_in[15:0]};
+            end
+            2: begin
+              data_out = data_out2;
+            end
+            
+            
+            default: data_out = data_out2;
+        endcase
         state_next = MEMWRITE;
       end
           
@@ -313,13 +327,24 @@ always @(*) begin
       state_next = ALUWB;
     end
     EXECUTE_J: begin 
-      if(DEBUG_ST) $display("EXECUTE J");
-      reg_w = rd;
-      RegWrite = 1;
-      data_out = pc_next+4;
+      $display("EXECUTE J");
       LinkReg = 1;
       PCWrite = 1;
       state_next = FETCH;
+    end
+    EXECUTE_JL: begin 
+      $display("EXECUTE JL");
+      reg_w = rd;
+      RegWrite = 1;
+      if (op == 7'b1101111) begin
+        ALU_srcA = pc; 
+        ALU_srcB = immJ;  
+      end else begin
+        ALU_srcA = data_out1; 
+        ALU_srcB = immI;  
+      end
+      data_out = ALU_resp;
+      state_next = EXECUTE_J;
     end
     EXECUTE_B: begin 
 
