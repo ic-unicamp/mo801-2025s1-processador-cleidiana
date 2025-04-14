@@ -4,8 +4,7 @@ module alu (
   input [3:0] ALU_ctr,
   input [31:0] ALU_srcA,   
   input  [31:0] ALU_srcB,       
-  output reg [31:0] ALU_resp,
-  output zero
+  output reg [31:0] ALU_resp
 );
 
 parameter ADD = 5'b00000;
@@ -19,8 +18,6 @@ parameter SLT = 5'b00111;
 parameter SRA = 5'b01110;
 parameter SLTU = 5'b01111;
 parameter SLL_12 = 5'b10000;
-
-assign zero = (ALU_resp == 0);
 
 always @(posedge clk) begin
 

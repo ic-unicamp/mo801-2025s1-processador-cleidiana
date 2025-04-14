@@ -35,59 +35,51 @@ always @(*) begin
 
     case (fmt)
         R_TYPE: begin
-            if (funct3 == 0) begin
-                if(funct7 == 0) ALU_ctr = ADD;
-                else if(funct7 == 'h20) ALU_ctr = SUB;
-            end 
-            else if (funct3 == 4) begin
-                ALU_ctr = XOR;
-            end 
-            else if (funct3 == 6) begin
-                ALU_ctr = OR;
-            end 
-            else if (funct3 == 7) begin
-                ALU_ctr = AND;
-            end 
-            else if (funct3 == 1) begin
-                ALU_ctr = SLL; 
-            end 
-            else if (funct3 == 5) begin
-                if (funct7 == 0) ALU_ctr = SRL; 
-                else if (funct7 == 'h20) ALU_ctr = SRA; 
-            end 
-            else if (funct3 == 2) begin
-                ALU_ctr = SLT; 
-            end
-            else if (funct3 == 3) begin 
-                ALU_ctr = SLTU;
-            end 
+            case (funct3)
+            
+                0: begin
+                    if(funct7 == 0) ALU_ctr = ADD;
+                    else if(funct7 == 'h20) ALU_ctr = SUB;
+                end
+
+                4: ALU_ctr = XOR;
+                6: ALU_ctr = OR;
+                7: ALU_ctr = AND;
+                1: ALU_ctr = SLL; 
+
+                5: begin
+                    if (funct7 == 0) ALU_ctr = SRL; 
+                    else if (funct7 == 'h20) ALU_ctr = SRA; 
+                end 
+
+                2: ALU_ctr = SLT; 
+                3: ALU_ctr = SLTU;
+
+                default: 
+                    ALU_ctr = AND;
+            endcase
         end
         I_TYPE: begin
-            if (funct3 == 0) begin
-               ALU_ctr = ADD;
-            end 
-            else if (funct3 == 4) begin
-                ALU_ctr = XOR;
-            end 
-            else if (funct3 == 6) begin
-                ALU_ctr = OR;
-            end 
-            else if (funct3 == 7) begin
-                ALU_ctr = AND;
-            end 
-            else if (funct3 == 1) begin
-                ALU_ctr = SLL; 
-            end 
-            else if (funct3 == 5) begin
-                if (funct7 == 0) ALU_ctr = SRL; 
-                else if (funct7 == 'h20) ALU_ctr = SRA; 
-            end 
-            else if (funct3 == 2) begin
-                ALU_ctr = SLT; 
-            end
-            else if (funct3 == 3) begin 
-                ALU_ctr = SLTU;
-            end  
+            case (funct3)
+
+                0: ALU_ctr = ADD:
+                4: ALU_ctr = XOR;
+                6: ALU_ctr = OR;
+                7: ALU_ctr = AND;
+                1: ALU_ctr = SLL; 
+
+                5: begin
+                    if (funct7 == 0) ALU_ctr = SRL; 
+                    else if (funct7 == 'h20) ALU_ctr = SRA; 
+                end 
+
+                2: ALU_ctr = SLT;
+                3: ALU_ctr = SLTU;
+
+                default: 
+                    ALU_ctr = AND;
+                endcase
+             
         end
         IL_TYPE: begin
          ALU_ctr = ADD;

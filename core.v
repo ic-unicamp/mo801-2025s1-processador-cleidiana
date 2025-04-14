@@ -79,7 +79,6 @@ parameter U_TYPE = 8;
 parameter UP_TYPE = 9;
 
 reg [31:0] regis[0:31];
-wire zero;
 wire [31:0] data_out1;
 wire [31:0] data_out2;
 reg [4:0] reg_w;
@@ -98,8 +97,7 @@ alu ad(
   .ALU_srcA(ALU_srcA),   
   .ALU_srcB(ALU_srcB),       
   .ALU_ctr(ALU_ctr_ad),
-  .ALU_resp(ALU_resp),
-  .zero(zero)
+  .ALU_resp(ALU_resp)
 );
 
 RegisterFile regisFile(   
@@ -230,14 +228,14 @@ always @(*) begin
         7'b0110111 : begin //U-type 
           if(DEBUG) $display("U-type");
           ALU_srcA = immU;
-          ALU_srcB = 12;
+          ALU_srcB = 0;
           state_next = EXECUTE_U;
           fmt = U_TYPE;
         end
         7'b0010111 : begin //U-type 
           if(DEBUG) $display("UP-type");
           ALU_srcA = immU;
-          ALU_srcB = 12;
+          ALU_srcB = 0;
           state_next = EXECUTE_UP;
           fmt = U_TYPE;
         end

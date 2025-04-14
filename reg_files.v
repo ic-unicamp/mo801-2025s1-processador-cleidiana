@@ -20,7 +20,6 @@ end
 always @(posedge clk) begin
   if (we && w)  begin
     regfile[w] = data_in;
-    $display("GRAVOU : 0x%h", data_in, " x", w);
   end
   
     
