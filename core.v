@@ -23,10 +23,10 @@ wire [31:0] immI, immS, immB, immU, immJ;
 reg [31:0] Adr;
 reg [3:0] state = 0, state_next = 0;
 reg [31:0] pc = 0;
-reg [31:0] pc_next = 4;
+reg [31:0] pc_next = 0;
 reg [31:0] pc_add;
 reg PCWrite;
-reg AdrSrc, MemWrite;
+reg AdrSrc, LinkReg, Branch, weMem;
 reg [31:0] instr;    
 reg IRWrite;
 reg ResultSrc = 0;
@@ -60,14 +60,22 @@ parameter MEMWB = 5;
 parameter MEMWRITE = 6;
 parameter EXECUTE = 7;
 parameter ALUWB = 8;
+parameter EXECUTE_B = 9;
+parameter EXECUTE_J = 10;
+parameter EXECUTE_U = 11;
+parameter EXECUTE_UP = 12;
 
 //Definições FMT
 parameter R_TYPE = 0;
 parameter I_TYPE = 1;
-parameter S_TYPE = 2;
-parameter B_TYPE = 3;
-parameter J_TYPE = 4;
-parameter U_TYPE = 5;
+parameter IL_TYPE = 2;
+parameter IE_TYPE = 3;
+parameter S_TYPE = 4;
+parameter B_TYPE = 5;
+parameter J_TYPE = 6;
+parameter JI_TYPE = 7;
+parameter U_TYPE = 8;
+parameter UP_TYPE = 9;
 
 reg [31:0] regis[0:31];
 wire zero;
@@ -85,6 +93,7 @@ alu_dec dec(
 );
 
 alu ad(  
+  .clk(clk),
   .ALU_srcA(ALU_srcA),   
   .ALU_srcB(ALU_srcB),       
   .ALU_ctr(ALU_ctr_ad),
@@ -92,7 +101,8 @@ alu ad(
   .zero(zero)
 );
 
-RegisterFile regisFile(     
+RegisterFile regisFile(   
+  .clk(clk),
   .rs1(rs1),         
   .rs2(rs2),         
   .w(reg_w),          
@@ -116,11 +126,11 @@ always @(posedge clk) begin
      
     if (PCWrite) begin
       pc = pc_next;
-      if(DEBUG) $display("PROXIMO PC: ", pc);
+      //$display("PROXIMO PC: 0x%h", pc);
     end
     if (IRWrite) begin
       instr = data_in;
-      if(DEBUG) $display("INST: ", instr);
+      //if(1) $display("INST: 0x%h", instr);
     end
     
   end
@@ -136,12 +146,15 @@ always @(*) begin
   AdrSrc = 0;  
   ALU_srcA = 0;
   ALU_srcB = 0;
-  MemWrite = 0;
   ResultSrc = 0;
   ImmSrc = 0;
   RegWrite = 0;
   state_next = state; 
   reg_w = 0;
+  LinkReg = 0;
+  pc_next = pc;
+  Branch = 0;
+  weMem = 0;
 
   case (state)
 
@@ -151,22 +164,20 @@ always @(*) begin
     end
 
     FETCH: begin 
-      if(DEBUG_ST) $display("FETCH");
+      //$display("FETCH 0x%h", pc_next);
       IRWrite = 1; 
-      PCWrite = 1;
-      pc_next = pc + 4;
       state_next = DECODE;
     end
 
     DECODE: begin 
       if(DEBUG_ST) $display("DECODE");
+      
       case (op)
         7'b0110011: begin //R-type 
           if(DEBUG) $display("R-type");
           ALU_srcA = data_out1;
           ALU_srcB = data_out2;
           state_next = EXECUTE;
-          data_out = ALU_resp;
           fmt = R_TYPE;
         end
         7'b0010011: begin //I-type 
@@ -174,56 +185,71 @@ always @(*) begin
           ALU_srcA = data_out1; 
           ALU_srcB = immI;      
           state_next = EXECUTE;
-          data_out = ALU_resp;
           fmt = I_TYPE;
         end
-        7'b0000011: begin //I-type 
-          if(DEBUG) $display("I-type");
-          state_next = EXECUTE;
-          data_out = ALU_resp;
-          fmt = I_TYPE;
-        end
-        7'b1110011 : begin //I-type 
-          if(DEBUG) $display("I-type");
+        7'b0000011: begin //I-type LOAD
+          if(DEBUG) $display("I-type LOAD");
           ALU_srcA = data_out1;
-          ALU_srcB = data_out2;
-          data_out = ALU_resp;
-          state_next = EXECUTE;
-          fmt = I_TYPE;
+          ALU_srcB = immI;
+          state_next = MEMADR;
+          fmt = IL_TYPE;
+        end
+        7'b1110011 : begin //I-type Env
+          if(DEBUG) $display("I-type Env");
+          state_next = IDLE;
+          fmt = IE_TYPE;
         end
         7'b0100011 : begin //S-type 
           if(DEBUG) $display("S-type");
           ALU_srcA = data_out1;
           ALU_srcB = immS;
-          data_out = data_out2;
           state_next = MEMADR;
-          AdrSrc = 1;
-          MemWrite = 1;
           fmt = S_TYPE;
         end
         7'b1100011 : begin //B-type 
-          if(DEBUG) $display("B-type");
-          ALU_srcA = data_out1;
-          ALU_srcB = data_out2;
-          state_next = EXECUTE;
+          $display("B-type");
+          ALU_srcA = pc_next;
+          ALU_srcB = immB;
+          state_next = EXECUTE_B;
           fmt = B_TYPE;
         end
         7'b1101111 : begin //J-type 
-          if(DEBUG) $display("J-type");
-          state_next = FETCH;
-          PCWrite = 1;
-          pc_next = immJ;
+          $display("J-type pc_next", pc_next);
+          ALU_srcA = pc_next;
+          ALU_srcB = immJ;
+          state_next = EXECUTE_J;
           fmt = J_TYPE;
+        end
+        7'b1100111 : begin //JI-type 
+          $display("JI-type");
+          ALU_srcA = data_out1; 
+          ALU_srcB = immI;     
+          state_next = EXECUTE_J;
+          fmt = JI_TYPE;
         end
         7'b0110111 : begin //U-type 
           if(DEBUG) $display("U-type");
-          ALU_srcA = data_out1;
-          ALU_srcB = data_out2;
-          state_next = EXECUTE;
+          ALU_srcA = immU;
+          ALU_srcB = 12;
+          state_next = EXECUTE_U;
           fmt = U_TYPE;
         end
-      default: begin
+        7'b0010111 : begin //U-type 
+          if(DEBUG) $display("UP-type");
+          ALU_srcA = immU;
+          ALU_srcB = 12;
+          state_next = EXECUTE_UP;
+          fmt = U_TYPE;
+        end
+        7'b0001111 : begin //I-type 
+          $display("FENCE");
+          PCWrite = 1;
+          state_next = FETCH;
+        end
+       
+        default: begin
         if(DEBUG) $display("DEFAULT");
+        PCWrite = 1;
         state_next = FETCH;
       end
     endcase
@@ -232,45 +258,143 @@ always @(*) begin
 
     MEMADR: begin 
       if(DEBUG_ST) $display("MEMADR");
-      if (op == 7'b0000011)
-          state_next = MEMREAD;
-      else
-          state_next = MEMWRITE;
+      AdrSrc = 1;
+      if (op == 7'b0000011) begin
+        RegWrite = 1;  
+        reg_w = rd;
+        if (funct3 == 0) begin
+          data_out = {{24{data_in[7]}}, data_in[7:0]};
+        end else if (funct3 == 1) begin
+          data_out = {{16{data_in[15]}}, data_in[15:0]};
+        end else if (funct3 == 2) begin
+          data_out = data_in;
+        end else if (funct3 == 4) begin
+          data_out = {24'b0, data_in[7:0]}; 
+        end else if (funct3 == 5) begin
+          data_out = {16'b0, data_in[15:0]};
+        end
+        state_next = MEMREAD;
+      end else begin
+        weMem = 1;
+        if (funct3 == 0) begin
+          data_out = {{24{data_out2[7]}}, data_out2[7:0]};
+        end else if (funct3 == 1) begin
+          data_out = {{16{data_out2[15]}}, data_out2[15:0]};
+        end else if (funct3 == 2) begin
+          data_out = data_out2; 
+        end
+        state_next = MEMWRITE;
+      end
+          
     end
 
     MEMREAD: begin 
       if(DEBUG_ST) $display("MEMREAD");
+      
       AdrSrc = 1;
       state_next = MEMWB;
     end
+    
     MEMWB: begin 
       if(DEBUG_ST) $display("MEMWB");
+      
+      PCWrite = 1;
       state_next = FETCH;
     end
+    
     MEMWRITE: begin 
       if(DEBUG_ST) $display("MEMWRITE");
+      PCWrite = 1;
       state_next = FETCH;
     end
+    
     EXECUTE: begin 
       if(DEBUG_ST) $display("EXECUTE");
+      data_out = ALU_resp;
       state_next = ALUWB;
+    end
+    EXECUTE_J: begin 
+      $display("EXECUTE J");
+      reg_w = rd;
+      RegWrite = 1;
+      data_out = pc_next+4;
+      LinkReg = 1;
+      PCWrite = 1;
+      state_next = FETCH;
+    end
+    EXECUTE_B: begin 
+      if(1) $display("EXECUTE_B 0x%h", pc);
+        
+        if (funct3 == 0) begin
+          if(data_out1 == data_out2) begin
+            Branch = 1;
+          end
+        end 
+        else if (funct3 == 1) begin
+          if(data_out1 != data_out2)begin
+            Branch = 1;
+          end
+        end 
+        else if (funct3 == 4) begin
+          if($signed(data_out1) < $signed(data_out2))begin
+            Branch = 1;
+          end
+        end 
+        else if (funct3 == 5) begin
+          if(($signed(data_out1) >= $signed(data_out2)))begin
+            Branch = 1;
+          end
+        end 
+        else if (funct3 == 6) begin
+          if(data_out1 < data_out2)begin
+            Branch = 1;
+          end
+        end 
+        else if (funct3 == 7) begin
+          if(data_out1 >= data_out2)begin
+            Branch = 1;
+          end
+        end 
+        PCWrite = 1;
+      state_next = FETCH;
+    end
+    EXECUTE_U: begin
+      data_out = ALU_resp;
+      state_next = ALUWB;
+    end
+    EXECUTE_UP: begin
+      ALU_srcA = ALU_resp;
+      ALU_srcB = pc_next;
+      state_next = EXECUTE_U;
+      fmt = UP_TYPE;
     end
     ALUWB: begin
       if(DEBUG_ST) $display("ALUWB");
       reg_w = rd;
       RegWrite = 1;
+      PCWrite = 1;
       state_next = FETCH;
     end
+    
     default: begin
       if(DEBUG_ST) $display("DEFAULT VAI FETCH");
+      PCWrite = 1;
       state_next = FETCH;
     end
-
   endcase
 
+  we = weMem;
+
   address = (AdrSrc) ? ALU_resp : pc_next;
-  we = MemWrite;
+
+  pc_next = pc_next + 4;
   
+  if (Branch || LinkReg) begin
+      pc_next = ALU_resp;
+  end 
+  
+  
+
 end
 
 endmodule

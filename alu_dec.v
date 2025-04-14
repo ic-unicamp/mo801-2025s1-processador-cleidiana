@@ -100,6 +100,9 @@ always @(*) begin
         J_TYPE: begin
             ALU_ctr = ADD;
         end
+        JI_TYPE: begin
+            ALU_ctr = ADD;
+        end
         U_TYPE: begin
             ALU_ctr = SLL;
         end
