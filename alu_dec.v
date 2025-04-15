@@ -18,9 +18,6 @@ parameter SLT = 5'b00111;
 parameter SRA = 5'b01110;
 parameter SLTU = 5'b01111;
 parameter SLL_12 = 5'b10000;
-parameter SLL_I = 5'b10001;
-parameter SRL_I = 5'b10010;
-parameter SRA_I = 5'b10011;
 
 //Definições FMT
 parameter R_TYPE = 0;
@@ -69,11 +66,11 @@ always @(*) begin
                 4: ALU_ctr = XOR;
                 6: ALU_ctr = OR;
                 7: ALU_ctr = AND;
-                1: ALU_ctr = SLL_I; 
+                1: ALU_ctr = SLL; 
 
                 5: begin
-                    if (funct7 == 0) ALU_ctr = SRL_I; 
-                    else if (funct7 == 'h20) ALU_ctr = SRA_I; 
+                    if (funct7 == 0) ALU_ctr = SRL; 
+                    else if (funct7 == 'h20) ALU_ctr = SRA; 
                 end 
 
                 2: ALU_ctr = SLT;

@@ -18,9 +18,6 @@ parameter SLT = 5'b00111;
 parameter SRA = 5'b01110;
 parameter SLTU = 5'b01111;
 parameter SLL_12 = 5'b10000;
-parameter SLL_I = 5'b10001;
-parameter SRL_I = 5'b10010;
-parameter SRA_I = 5'b10011;
 
 always @(posedge clk) begin
 
@@ -30,13 +27,10 @@ always @(posedge clk) begin
     AND: ALU_resp = ALU_srcA & ALU_srcB;       
     OR: ALU_resp = ALU_srcA | ALU_srcB;         
     XOR: ALU_resp = ALU_srcA ^ ALU_srcB;       
-    SLL_I: ALU_resp = ALU_srcA << ALU_srcB[4:0];  
+    SLL: ALU_resp = ALU_srcA << ALU_srcB[4:0];  
     SLL_12: ALU_resp = ALU_srcA << 12;    
-    SRL_I: ALU_resp = ($unsigned(ALU_srcA)) >> ($unsigned(ALU_srcB[4:0]));  
-    SRA_I: ALU_resp = $signed(ALU_srcA) >>> ALU_srcB[4:0];
-    SLL: ALU_resp = ALU_srcA << ALU_srcB;  
-    SRL: ALU_resp = ($unsigned(ALU_srcA)) >> ($unsigned(ALU_srcB));  
-    SRA: ALU_resp = $signed(ALU_srcA) >>> ALU_srcB;
+    SRL: ALU_resp = ALU_srcA >> ALU_srcB[4:0];  
+    SRA: ALU_resp = $signed(ALU_srcA) >>> ALU_srcB[4:0];
     SLT: ALU_resp = ($signed(ALU_srcA) < $signed(ALU_srcB)) ? 32'd1 : 32'd0; 
     SLTU: ALU_resp = ($unsigned(ALU_srcA) < $unsigned(ALU_srcB)) ? 32'd1 : 32'd0; 
     
