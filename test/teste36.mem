@@ -1,0 +1,13 @@
+0x40000213	// addi x4 x0 1024	addi x4, x0, 1024 # x4 = 1024
+0x00420233	// add x4 x4 x4	add x4, x4, x4 # x4 = 2048 (0x800) → endereço base para store
+0xfffff2b7	// lui x5 1048575	lui x5, 0xFFFFF # x5 = 0xFFFFF000 (negativo em 32 bits: -4096)
+0xf8028293	// addi x5 x5 -128	addi x5, x5, -128 # x5 = 0xFFFFF080 (valor negativo)
+0x00300313	// addi x6 x0 3	addi x6, x0, 3 # x6 = 3 (número de bits a deslocar)
+0x4062d3b3	// sra x7 x5 x6	sra x7, x5, x6 # x7 = x5 >> 3 (com sinal) → resultado negativo esperado
+0x00100413	// addi x8 x0 1	addi x8, x0, 1 # x8 = 1
+0x00200493	// addi x9 x0 2	addi x9, x0, 2 # x9 = 2
+0x00943533	// sltu x10 x8 x9	sltu x10, x8, x9 # x10 = (1 < 2)? 1 : 0 → resultado: 1
+0x0084b5b3	// sltu x11 x9 x8	sltu x11, x9, x8 # x11 = (2 < 1)? 0 : 0 → resultado: 0
+0x00722023	// sw x7 0(x4)	sw x7, 0(x4) # salva resultado do sra
+0x00a22223	// sw x10 4(x4)	sw x10, 4(x4) # salva resultado do sltu (1 < 2)
+0x00b22423	// sw x11 8(x4)	sw x11, 8(x4) # salva resultado do sltu (2 < 1)

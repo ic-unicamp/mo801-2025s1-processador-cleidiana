@@ -1,0 +1,11 @@
+0x40000213   //  addi x4, x0, 1024        // x4 = 1024
+0x00420233   //  add  x4, x4, x4          // x4 = 2048 (0x800) → endereço base
+0xfffff2b7   //  lui  x5, 0xFFFFF         // x5 = 0xFFFFF000 (negativo)
+0xfc028293   //  addi x5, x5, -64         // x5 = 0xFFFFF000 + (-64) = 0xFFFFF040
+0x4032d313   //  srai x6, x5, 3           // x6 = x5 >> 3 com sinal → espera valor negativo
+0x00500393   //  addi x7, x0, 5           // x7 = 5
+0x00a3b413   //  sltiu x8, x7, 10         // x8 = (5 < 10)? 1 : 0 → espera 1
+0x0023b493   //  sltiu x9, x7, 2          // x9 = (5 < 2)? 0 : 0 → espera 0
+0x00622023   //  sw x6, 0(x4)             // salva resultado do srai
+0x00822223   //  sw x8, 4(x4)             // salva 1 (5 < 10)
+0x00922423   //  sw x9, 8(x4)             // salva 0 (5 < 2 é falso)
