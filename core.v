@@ -297,7 +297,8 @@ always @(*) begin
           end
         endcase
         state_next = MEMREAD;
-      end else if (op == 7'b0100011) begin //STORE
+      end 
+      else if (op == 7'b0100011) begin //STORE
         
         weMem = 1;
         case (funct3)
@@ -322,7 +323,8 @@ always @(*) begin
             default: data_out = data_out2;
         endcase
         state_next = MEMWRITE;
-      end else begin
+      end 
+      else begin
         data_out = 32'b0;
         state_next = MEMREAD;
       end
@@ -378,37 +380,41 @@ always @(*) begin
     end
     EXECUTE_B: begin 
 
-      if(DEBUG_ST)  $display("EXECUTE_B 0x%h", pc);
-      if (funct3 == 0) begin
-        if(data_out1 == data_out2) begin
-          Branch = 1;
+      if(DEBUG_ST)  $display("EXECUTE_B");
+      case (funct3)
+        0: begin //BEQ
+          if(data_out1 == data_out2) begin
+            Branch = 1;
+          end
         end
-      end 
-      else if (funct3 == 1) begin
-        if(data_out1 != data_out2)begin
-          Branch = 1;
+        1: begin //BNE
+          if(data_out1 != data_out2)begin
+            Branch = 1;
+          end
         end
-      end 
-      else if (funct3 == 4) begin
-        if($signed(data_out1) < $signed(data_out2))begin
-          Branch = 1;
+        4: begin //BLT
+          if($signed(data_out1) < $signed(data_out2)) begin
+            Branch = 1;
+          end
         end
-      end 
-      else if (funct3 == 5) begin
-        if(($signed(data_out1) >= $signed(data_out2)))begin
-          Branch = 1;
+        5: begin //BGE
+          if(($signed(data_out1) >= $signed(data_out2)))begin
+            Branch = 1;
+          end
         end
-      end 
-      else if (funct3 == 6) begin
-        if(data_out1 < data_out2)begin
-          Branch = 1;
+        6: begin //BLTU
+          if(data_out1 < data_out2)begin
+            Branch = 1;
+          end
         end
-      end 
-      else if (funct3 == 7) begin
-        if(data_out1 >= data_out2)begin
-          Branch = 1;
-        end
-      end 
+        7: begin //BGEU
+          if(data_out1 >= data_out2)begin
+            Branch = 1;
+          end
+        end 
+      default: 
+        Branch = 0;
+      endcase
       PCWrite = 1;
       state_next = FETCH;
     end
